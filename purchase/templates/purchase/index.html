@@ -1,36 +1,79 @@
-{% extends 'base.html' %}
+<!DOCTYPE html>
+<html style="height: 100%">
+   <head>
+       <meta charset="utf-8">
+       <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+   </head>
+   <body style="height: 100%; margin: 0">
 
-{% block title %} Dashboard {% endblock %}
+        <p>Date: <input type="text" id="datepicker"> <button type="button" id="filter">Click</button></p>
+       <div id="container" style="height: 100%"></div>
+       {% load static %}
+       <script src="{% static 'assets/js/echarts.min.js' %}"></script>
+       <script src="{% static 'assets/js/echarts-gl.min.js' %}"></script>
+       <script src="{% static 'assets/js/ecStat.min.js' %}"></script>
+       <script src="{% static 'assets/js/dataTool.min.js' %}"></script>
+       <script src="{% static 'assets/js/china.js' %}"></script>
+       <script src="{% static 'assets/js/world.js' %}"></script>
+       <script src="https://code.jquery.com/jquery-3.1.0.min.js"></script>
+       <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
 
-{% block javascript %}
-{% load static %}
- <script src="{% static 'assets/js/echarts.min.js' %}"></script>
-    <script src="{% static 'assets/js/echarts-gl.min.js' %}"></script>
-<script src="{% static 'assets/js/ecStat.min.js' %}"></script>
-    <script src="{% static 'assets/js/dataTool.min.js' %}"></script>
-<script src="{% static 'assets/js/china.js' %}"></script>
-    <script src="{% static 'assets/js/world.js' %}"></script>
-       <script type="text/javascript">
-var dom = document.getElementById("container");
-var myChart = echarts.init(dom);
-var app = {};
-option = null;
-option = {
-    xAxis: {
-        type: 'category',
-        data: {{data.xAxis}}
-    },
-    c: {
-        type: 'value'
-    },
-    series: [{
-        data: {{data.yAxis}},
-        type: 'bar'
-    }]
-};
+      <script>
+      $(document).ready(function() {
+            $('#datepicker').datepicker({
+                dateFormat: "yy-mm-dd",
+                minDate: new Date(2018, 12, 1),
+                maxDate: new Date(2020, 2, 28),
+                setDate: new Date(2019, 1, 1)
+            });
 
-if (option && typeof option === "object") {
-    myChart.setOption(option, true);
-}
-       </script>
-    {% endblock %}
+            ajax_filter();
+
+            $( "#filter" ).click(function() {
+                var filter_date = $('#datepicker').val()
+                ajax_filter(filter_date)
+            });
+
+        function ajax_filter(date=''){
+            $.ajax({
+            url: '/filter/',
+            type: "POST",
+            data: {
+              'date': date
+            },
+            dataType: 'json',
+            success: function (data) {
+              if (data) {
+                bar_chart(data)
+              }
+            }
+          });
+          }
+
+          function bar_chart(data){
+                var dom = document.getElementById("container");
+                var myChart = echarts.init(dom);
+                var app = {};
+                option = null;
+                option = {
+                    xAxis: {
+                        type: 'category',
+                        data: data['xAxis']
+                    },
+                    yAxis: {
+                        type: 'value'
+                    },
+                    series: [{
+                        data: data['yAxis'],
+                        type: 'bar'
+                    }]
+                };
+
+                if (option && typeof option === "object") {
+                    myChart.setOption(option, true);
+                }
+          }
+        });
+        </script>
+   </body>
+</html>

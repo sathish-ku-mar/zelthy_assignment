@@ -9,7 +9,7 @@ router.register(r'', PurchaseViewSet)
 
 
 urlpatterns = [
-    # path(r'search/', MovieViewSet.as_view({'post': 'search'}), name='search'),
+    url(r'filter/', PurchaseViewSet.as_view({'post': 'filter'}), name='filter'),
 ]
 
 urlpatterns += router.urls
